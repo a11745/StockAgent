@@ -442,7 +442,7 @@ docker compose up -d mongodb redis web data-sync backtest
 
 ## QQ群
 
-![Dashboard](docs/images/QQ群二维码.png)
+![Dashboard](docs/images/QQ群二维码.jpg)
 <div align="center">
   <p>有问题可进Q群交流</p>
 </div>
