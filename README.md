@@ -439,3 +439,10 @@ docker compose up -d mongodb redis web data-sync backtest
 <div align="center">
   <p>如果这个项目对你有帮助，请给一个 ⭐ Star 支持一下！</p>
 </div>
+
+## QQ群
+
+![Dashboard](docs/images/QQ群二维码.png)
+<div align="center">
+  <p>有问题可进Q群交流</p>
+</div>
