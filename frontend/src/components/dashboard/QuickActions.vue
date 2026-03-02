@@ -6,8 +6,8 @@
  */
 import { useRouter } from 'vue-router'
 import { useTask } from '@/hooks'
-import { ElMessage, ElIcon } from 'element-plus'
-import { TrendCharts, Aim, Star, Document, Timer, Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { TrendCharts, Aim, Star, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const { analyzeMarket, isCreating } = useTask()

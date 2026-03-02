@@ -64,6 +64,13 @@ async function quickAnalyze(stock: StockBasic, event: Event) {
   showDropdown.value = false
 }
 
+// 失去焦点处理
+function handleBlur() {
+  setTimeout(() => {
+    showDropdown.value = false
+  }, 200)
+}
+
 // 自然语言查询
 async function handleQuery() {
   if (!keyword.value.trim()) return
@@ -104,7 +111,7 @@ async function handleQuery() {
           :prefix-icon="Search"
           clearable
           @focus="showDropdown = true"
-          @blur="setTimeout(() => showDropdown = false, 200)"
+          @blur="handleBlur"
           @keyup.enter="handleQuery"
         >
           <template #suffix>

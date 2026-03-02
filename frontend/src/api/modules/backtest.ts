@@ -2,7 +2,7 @@
  * 回测 API
  */
 
-import httpClient from '../client'
+import { api } from '../client'
 
 // ==================== 类型定义 ====================
 
@@ -172,22 +172,21 @@ export interface FactorListResponse {
  * 提交回测任务
  */
 export async function submitBacktest(request: BacktestRequest): Promise<BacktestTaskResponse> {
-  // httpClient 响应拦截器已经返回 response.data，这里直接返回
-  return await httpClient.post<BacktestTaskResponse>('/backtest/submit', request) as unknown as BacktestTaskResponse
+  return api.post<BacktestTaskResponse>('/backtest/submit', request)
 }
 
 /**
  * 查询回测任务状态
  */
 export async function getBacktestStatus(taskId: string): Promise<BacktestStatus> {
-  return await httpClient.get<BacktestStatus>(`/backtest/status/${taskId}`) as unknown as BacktestStatus
+  return api.get<BacktestStatus>(`/backtest/status/${taskId}`)
 }
 
 /**
  * 获取回测结果
  */
 export async function getBacktestResult(taskId: string): Promise<BacktestResult> {
-  return await httpClient.get<BacktestResult>(`/backtest/result/${taskId}`) as unknown as BacktestResult
+  return api.get<BacktestResult>(`/backtest/result/${taskId}`)
 }
 
 /**
@@ -203,31 +202,31 @@ export async function getBacktestHistory(
   if (taskType) {
     params.task_type = taskType
   }
-  return await httpClient.get<{ total: number; items: BacktestHistoryItem[] }>(
+  return api.get<{ total: number; items: BacktestHistoryItem[] }>(
     '/backtest/history',
     { params }
-  ) as unknown as { total: number; items: BacktestHistoryItem[] }
+  )
 }
 
 /**
  * 取消回测任务
  */
 export async function cancelBacktest(taskId: string): Promise<{ task_id: string; status: string }> {
-  return await httpClient.delete<{ task_id: string; status: string }>(`/backtest/${taskId}`) as unknown as { task_id: string; status: string }
+  return api.delete<{ task_id: string; status: string }>(`/backtest/${taskId}`)
 }
 
 /**
  * 获取可用因子列表
  */
 export async function getFactors(): Promise<FactorListResponse> {
-  return await httpClient.get<FactorListResponse>('/backtest/factors') as unknown as FactorListResponse
+  return api.get<FactorListResponse>('/backtest/factors')
 }
 
 /**
  * 提交因子选股回测
  */
 export async function submitFactorSelection(request: FactorSelectionRequest): Promise<BacktestTaskResponse> {
-  return await httpClient.post<BacktestTaskResponse>('/backtest/factor-selection', request) as unknown as BacktestTaskResponse
+  return api.post<BacktestTaskResponse>('/backtest/factor-selection', request)
 }
 
 export default {

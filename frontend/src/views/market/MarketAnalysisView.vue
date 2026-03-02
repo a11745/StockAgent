@@ -268,7 +268,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import * as echarts from 'echarts'
 import { marketApi } from '@/api/modules/market'
-import { HotNewsBoard } from '@/components'
+import HotNewsBoard from '@/components/dashboard/HotNewsBoard.vue'
 
 // 高对比度配色
 const COLORS = {
@@ -300,26 +300,7 @@ const themeRadar = ref<any>(null)
 const conceptRanking = ref<any[]>([])
 const industryHistory = ref<any[]>([])
 const conceptHistory = ref<any[]>([])
-const selectedIndustryDate = ref<string>('')
-const selectedConceptDate = ref<string>('')
 const activeTab = ref('market_data')
-
-// 计算属性：当前选中日期的排行数据
-const currentIndustryRanking = computed(() => {
-  if (!selectedIndustryDate.value && industryHistory.value.length > 0) {
-    selectedIndustryDate.value = industryHistory.value[0]?.trade_date || ''
-  }
-  const found = industryHistory.value.find(h => h.trade_date === selectedIndustryDate.value)
-  return found?.rankings || industryRanking.value
-})
-
-const currentConceptRanking = computed(() => {
-  if (!selectedConceptDate.value && conceptHistory.value.length > 0) {
-    selectedConceptDate.value = conceptHistory.value[0]?.trade_date || ''
-  }
-  const found = conceptHistory.value.find(h => h.trade_date === selectedConceptDate.value)
-  return found?.rankings || conceptRanking.value
-})
 
 // 图表引用
 const upDownChartRef = ref<HTMLElement | null>(null)
@@ -351,13 +332,6 @@ const getCycleShortName = (cycle: string) => {
     'incubation': '萌芽', 'main_upward': '主升', 'rotation': '分歧',
   }
   return map[cycle] || '-'
-}
-
-const getRankClass = (rank: number) => {
-  if (rank === 1) return 'gold'
-  if (rank === 2) return 'silver'
-  if (rank === 3) return 'bronze'
-  return ''
 }
 
 // 格式化
@@ -399,8 +373,8 @@ const loadData = async () => {
     conceptRanking.value = conceptRes.rankings || []
     industryHistory.value = industryRes.history || []
     conceptHistory.value = conceptRes.history || []
-    historyData.value = historyRes.history || historyRes.list || []
-    tableData.value = tableRes.data || tableRes.list || []
+    historyData.value = historyRes.history || (historyRes as any).list || []
+    tableData.value = tableRes.data || (tableRes as any).list || []
     themeRadar.value = radarRes
     updateCharts()
   } catch (error) {
@@ -427,8 +401,6 @@ const updateCharts = () => {
   
   const dates = historyData.value.map(d => d.trade_date?.slice(4, 8) || '')
   
-  // 通用网格配置 - 使用百分比确保自适应
-  const gridConfig = { left: '6%', right: '4%', bottom: 40, top: 30, containLabel: true }
   // 暗色模式适配的图表样式
   const isDark = document.documentElement.classList.contains('dark')
   const axisLineStyle = { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : '#333' } }

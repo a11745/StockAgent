@@ -8,8 +8,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTaskStore } from '@/stores/task'
 import { TaskStatus } from '@/api/types'
-import { ElBadge, ElProgress, ElIcon } from 'element-plus'
-import { Loading, Timer, ArrowRight, TrendCharts, DataAnalysis, Document } from '@element-plus/icons-vue'
+import { Timer, ArrowRight, TrendCharts, DataAnalysis, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const taskStore = useTaskStore()

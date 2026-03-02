@@ -25,7 +25,7 @@ import {
   ArrowRight,
   Delete,
 } from '@element-plus/icons-vue'
-import type { TaskStatus, TaskType, Task, StockBasic } from '@/api/types'
+import type { Task, StockBasic } from '@/api/types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -197,24 +197,23 @@ function openCreateDialog() {
   selectedStock.value = null
 }
 
-async function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): Promise<void> {
+function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): void {
   if (!queryString.trim()) {
     cb([])
     return
   }
   
-  try {
-    const results = await stockApi.searchStocks(queryString, 10)
-    cb(results)
-  } catch (error) {
-    console.error('Stock search failed:', error)
-    cb([])
-  }
+  stockApi.searchStocks(queryString, 10)
+    .then(results => cb(results))
+    .catch(error => {
+      console.error('Stock search failed:', error)
+      cb([])
+    })
 }
 
-function handleStockSelect(stock: StockBasic): void {
-  selectedStock.value = stock
-  newStockCode.value = stock.ts_code
+function handleStockSelect(stock: Record<string, any>): void {
+  selectedStock.value = stock as StockBasic
+  newStockCode.value = stock.ts_code || ''
 }
 
 async function handleCreateTask(): Promise<void> {

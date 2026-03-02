@@ -88,7 +88,7 @@ async def sync_limit_list(trade_dates: list):
             failed_days += 1
         
         # 避免 API 限流
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(1)
     
     # 更新同步记录
     if trade_dates and success_days > 0:

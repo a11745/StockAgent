@@ -10,7 +10,7 @@
  */
 
 import { ref, computed, onMounted, watch } from 'vue'
-import { ElTabs, ElTabPane, ElSkeleton, ElEmpty, ElIcon, ElButton, ElMessage, ElTooltip } from 'element-plus'
+import { ElTabs, ElTabPane, ElSkeleton, ElEmpty, ElButton, ElMessage, ElTooltip } from 'element-plus'
 import { Refresh, Link, Sunny } from '@element-plus/icons-vue'
 import { marketApi } from '@/api'
 import type { HotNewsItem, HotNewsSource } from '@/api/modules/market'

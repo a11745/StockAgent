@@ -18,7 +18,8 @@ import {
   ElSkeleton,
 } from 'element-plus'
 import { Refresh, Back } from '@element-plus/icons-vue'
-import { AgentThinking, TaskStatusBadge } from '@/components'
+import AgentThinking from '@/components/agent/AgentThinking.vue'
+import TaskStatusBadge from '@/components/agent/TaskStatusBadge.vue'
 import { useTask } from '@/hooks'
 import { useWebSocket } from '@/hooks'
 import { taskApi } from '@/api'

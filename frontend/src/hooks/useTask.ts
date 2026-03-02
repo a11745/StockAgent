@@ -15,6 +15,7 @@ export function useTask() {
   const { subscribeTask, isConnected } = useWebSocket({ autoConnect: false })
   
   const isCreating = ref(false)
+  const isLoading = ref(false)
   
   // ==================== 计算属性 ====================
   
@@ -41,6 +42,7 @@ export function useTask() {
         task_type: request.task_type,
         status: response.status,
         ts_codes: request.ts_codes || [],
+        stock_names: [],
         query: request.query,
         params: request.params,
         created_at: new Date().toISOString(),
@@ -100,11 +102,14 @@ export function useTask() {
   }
   
   async function refreshTaskList(): Promise<void> {
+    isLoading.value = true
     try {
       const response = await taskApi.listTasks({ limit: 50 })
       taskStore.setTasks(response.tasks)
     } catch (error) {
       console.error('Refresh task list failed:', error)
+    } finally {
+      isLoading.value = false
     }
   }
   
@@ -153,6 +158,7 @@ export function useTask() {
     currentTask,
     currentThoughts,
     isCreating,
+    isLoading,
     
     // 方法
     createTask,

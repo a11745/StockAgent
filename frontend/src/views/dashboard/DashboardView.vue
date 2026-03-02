@@ -6,15 +6,13 @@
  */
 
 import { onMounted, ref, computed } from 'vue'
-import { ElInput, ElButton, ElMessage, ElIcon, ElAutocomplete } from 'element-plus'
+import { ElMessage, ElAutocomplete } from 'element-plus'
 import { Search, TrendCharts, DataAnalysis, Promotion} from '@element-plus/icons-vue'
-import { 
-  MarketOverviewCard, 
-  WatchlistCard, 
-  TaskProgressCard, 
-  RecentTasks,
-  QuickActions,
-} from '@/components'
+import MarketOverviewCard from '@/components/dashboard/MarketOverviewCard.vue'
+import WatchlistCard from '@/components/dashboard/WatchlistCard.vue'
+import TaskProgressCard from '@/components/dashboard/TaskProgressCard.vue'
+import RecentTasks from '@/components/dashboard/RecentTasks.vue'
+import QuickActions from '@/components/dashboard/QuickActions.vue'
 import { useTask, useWebSocket } from '@/hooks'
 import { useMarketStore } from '@/stores'
 import { stockApi } from '@/api'
@@ -32,7 +30,6 @@ const searchQuery = ref('')
 const stockCode = ref('')
 const selectedStock = ref<StockBasic | null>(null)
 const isSearchFocused = ref(false)
-const stockSuggestions = ref<StockBasic[]>([])
 
 // ==================== 计算属性 ====================
 
@@ -61,27 +58,26 @@ async function handleSearch(): Promise<void> {
 /**
  * 股票搜索 - 远程获取建议列表
  */
-async function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): Promise<void> {
+function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): void {
   if (!queryString.trim()) {
     cb([])
     return
   }
   
-  try {
-    const results = await stockApi.searchStocks(queryString, 10)
-    cb(results)
-  } catch (error) {
-    console.error('Stock search failed:', error)
-    cb([])
-  }
+  stockApi.searchStocks(queryString, 10)
+    .then(results => cb(results))
+    .catch(error => {
+      console.error('Stock search failed:', error)
+      cb([])
+    })
 }
 
 /**
  * 选中股票
  */
-function handleStockSelect(stock: StockBasic): void {
-  selectedStock.value = stock
-  stockCode.value = stock.ts_code
+function handleStockSelect(stock: Record<string, any>): void {
+  selectedStock.value = stock as StockBasic
+  stockCode.value = stock.ts_code || ''
 }
 
 async function handleQuickAnalyze(): Promise<void> {

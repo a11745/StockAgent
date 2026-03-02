@@ -5,13 +5,13 @@ import { useMarketStore } from '@/stores/market'
 import { useUserStore } from '@/stores/user'
 import { useTask } from '@/hooks'
 import { stockApi, subscriptionApi } from '@/api'
-import { ElMessage, ElDialog, ElSelect, ElOption, ElTag, ElEmpty, ElSkeleton } from 'element-plus'
+import { ElMessage, ElDialog, ElSelect, ElOption, ElTag, ElEmpty } from 'element-plus'
 import StockChart from '@/components/charts/StockChart.vue'
 import { 
   ArrowLeft, Star, StarFilled, TrendCharts, Bell, Document, 
   Histogram, Clock, ArrowUp, ArrowDown, Refresh
 } from '@element-plus/icons-vue'
-import type { StockQuote, StrategySubscription } from '@/api/types'
+import type { StockQuote, StrategySubscription, StockDaily } from '@/api/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,7 +31,7 @@ const stockInfo = ref<{
   area?: string
   market?: string
 } | null>(null)
-const klineData = ref<{ trade_date: string; open: number; high: number; low: number; close: number }[]>([])
+const klineData = ref<StockDaily[]>([])
 const loading = ref(true)
 const chartLoading = ref(true)
 

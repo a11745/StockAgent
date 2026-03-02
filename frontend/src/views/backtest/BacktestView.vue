@@ -463,7 +463,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { 
   submitBacktest as submitBacktestApi, 
@@ -693,20 +693,6 @@ function handleSearchBlur(): void {
   setTimeout(() => {
     showSuggestions.value = false
   }, 200)
-}
-
-async function validateStockCode(): Promise<void> {
-  if (!form.ts_code.match(/^\d{6}\.(SH|SZ|BJ)$/)) {
-    stockName.value = ''
-    return
-  }
-  
-  try {
-    const info = await stockApi.getStockBasic(form.ts_code)
-    stockName.value = info.name || ''
-  } catch {
-    stockName.value = ''
-  }
 }
 
 async function submitBacktest(): Promise<void> {

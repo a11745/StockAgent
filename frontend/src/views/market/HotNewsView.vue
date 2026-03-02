@@ -93,13 +93,6 @@ const displaySources = computed(() => {
   }
 })
 
-// 来源配置映射
-const sourceMap = computed(() => {
-  const map: Record<string, SourceConfig> = {}
-  allSources.forEach(s => { map[s.id] = s })
-  return map
-})
-
 // ==================== 方法 ====================
 
 // 加载用户偏好

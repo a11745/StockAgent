@@ -12,6 +12,7 @@
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timedelta
 import time
+import asyncio
 
 from core.base import BaseCollector
 from core.settings import settings
@@ -96,6 +97,9 @@ class LimitListCollector(BaseCollector):
                     
             except Exception as e:
                 self.logger.warning(f"Failed to fetch limit list for {trade_date}: {e}")
+            
+            # 频率限制：limit_list_d 接口每秒最多访问1次
+            await asyncio.sleep(1.0)
             
             # 缓冲区满时批量写入
             if len(buffer) >= self.WRITE_BATCH_SIZE:

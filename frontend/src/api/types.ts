@@ -231,6 +231,7 @@ export interface StockQuote {
   high: number
   low: number
   open: number
+  pre_close?: number
 }
 
 export interface MarketOverview {
@@ -339,7 +340,7 @@ export interface ToggleSubscriptionResponse {
 export interface StrategyParamDef {
   key: string
   label: string
-  type: 'number' | 'boolean' | 'string'
+  type: 'number' | 'float' | 'boolean' | 'string'
   default: number | boolean | string
 }
 

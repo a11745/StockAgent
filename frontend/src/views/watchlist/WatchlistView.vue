@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useMarketStore } from '@/stores/market'
 import { useTask } from '@/hooks'
 import { stockApi } from '@/api'
-import { ElMessage, ElDialog, ElAutocomplete, ElButton, ElIcon, ElEmpty, ElInput, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
+import { ElMessage, ElDialog, ElAutocomplete, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
 import { Plus, Delete, Search, ArrowUp, ArrowDown, TrendCharts, View, Sort, Refresh, Star, Loading } from '@element-plus/icons-vue'
 import type { StockQuote, StockBasic } from '@/api/types'
 
@@ -180,24 +180,23 @@ function openAddDialog() {
   selectedStock.value = null
 }
 
-async function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): Promise<void> {
+function handleStockSearch(queryString: string, cb: (results: StockBasic[]) => void): void {
   if (!queryString.trim()) {
     cb([])
     return
   }
   
-  try {
-    const results = await stockApi.searchStocks(queryString, 10)
-    cb(results)
-  } catch (error) {
-    console.error('Stock search failed:', error)
-    cb([])
-  }
+  stockApi.searchStocks(queryString, 10)
+    .then(results => cb(results))
+    .catch(error => {
+      console.error('Stock search failed:', error)
+      cb([])
+    })
 }
 
-function handleStockSelect(stock: StockBasic): void {
-  selectedStock.value = stock
-  searchKeyword.value = stock.ts_code
+function handleStockSelect(stock: Record<string, any>): void {
+  selectedStock.value = stock as StockBasic
+  searchKeyword.value = stock.ts_code || ''
 }
 
 async function handleAddStock(): Promise<void> {

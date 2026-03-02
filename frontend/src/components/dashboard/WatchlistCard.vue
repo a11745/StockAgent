@@ -8,7 +8,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useMarketStore } from '@/stores/market'
-import { ElEmpty, ElButton, ElSkeleton, ElIcon } from 'element-plus'
+import { ElSkeleton } from 'element-plus'
 import { ArrowRight, Plus, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 import type { StockQuote } from '@/api'
 

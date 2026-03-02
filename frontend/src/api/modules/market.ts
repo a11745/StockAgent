@@ -2,7 +2,7 @@
  * 市场分析 API
  */
 
-import httpClient from '../client'
+import { api } from '../client'
 
 export interface MarketScores {
   sentiment: number
@@ -206,19 +206,19 @@ export const marketApi = {
    * 获取最新市场数据
    */
   getLatest: () => 
-    httpClient.get<MarketLatest>('/market/latest'),
+    api.get<MarketLatest>('/market/latest'),
 
   /**
    * 获取历史数据
    */
   getHistory: (days: number = 30) => 
-    httpClient.get<{ history: MarketHistoryItem[] }>('/market/history', { params: { days } }),
+    api.get<{ history: MarketHistoryItem[] }>('/market/history', { params: { days } }),
 
   /**
    * 获取板块排名
    */
   getSectorRanking: (rankingType: string = 'industry_top', days: number = 1, tradeDate?: string) =>
-    httpClient.get<{ trade_date: string; rankings: SectorRanking[]; history: any[] }>('/market/sector-ranking', {
+    api.get<{ trade_date: string; rankings: SectorRanking[]; history: any[] }>('/market/sector-ranking', {
       params: { ranking_type: rankingType, days, trade_date: tradeDate }
     }),
 
@@ -226,37 +226,37 @@ export const marketApi = {
    * 获取统计表格数据
    */
   getStatsTable: (days: number = 15) =>
-    httpClient.get<{ data: StatsTableItem[] }>('/market/stats-table', { params: { days } }),
+    api.get<{ data: StatsTableItem[] }>('/market/stats-table', { params: { days } }),
 
   /**
    * 获取主线雷达数据
    */
   getThemeRadar: (tradeDate?: string) =>
-    httpClient.get<ThemeRadar>('/market/theme-radar', { params: { trade_date: tradeDate } }),
+    api.get<ThemeRadar>('/market/theme-radar', { params: { trade_date: tradeDate } }),
 
   /**
    * 获取完整主线分析
    */
   getThemeAnalysis: (tradeDate?: string, days: number = 5) =>
-    httpClient.get<ThemeAnalysis>('/market/theme-analysis', { params: { trade_date: tradeDate, days } }),
+    api.get<ThemeAnalysis>('/market/theme-analysis', { params: { trade_date: tradeDate, days } }),
 
   /**
    * 获取板块时间线数据
    */
   getSectorTimeline: (rankingType: string = 'industry_top', days: number = 10) =>
-    httpClient.get<SectorTimeline>('/market/sector-timeline', { params: { ranking_type: rankingType, days } }),
+    api.get<SectorTimeline>('/market/sector-timeline', { params: { ranking_type: rankingType, days } }),
 
   /**
    * 获取板块长周期评分
    */
   getSectorScores: (tradeDate?: string, days: number = 20) =>
-    httpClient.get<SectorScoresResult>('/market/sector-scores', { params: { trade_date: tradeDate, days } }),
+    api.get<SectorScoresResult>('/market/sector-scores', { params: { trade_date: tradeDate, days } }),
 
   /**
    * 获取板块散点图数据
    */
   getSectorScatter: (tradeDate?: string) =>
-    httpClient.get<SectorScatterResult>('/market/sector-scatter', { params: { trade_date: tradeDate } }),
+    api.get<SectorScatterResult>('/market/sector-scatter', { params: { trade_date: tradeDate } }),
 
   // ==================== 热点新闻 ====================
 
@@ -264,19 +264,19 @@ export const marketApi = {
    * 获取热点新闻
    */
   getHotNews: (source?: string, limit: number = 50) =>
-    httpClient.get<HotNewsResult>('/market/hot_news', { params: { source, limit } }),
+    api.get<HotNewsResult>('/market/hot_news', { params: { source, limit } }),
 
   /**
    * 获取热点新闻来源列表
    */
   getHotNewsSources: () =>
-    httpClient.get<{ sources: HotNewsSource[] }>('/market/hot_news/sources'),
+    api.get<{ sources: HotNewsSource[] }>('/market/hot_news/sources'),
 
   /**
    * 刷新热点新闻
    */
   refreshHotNews: (source?: string) =>
-    httpClient.post<{ 
+    api.post<{ 
       success_count?: number
       fail_count?: number
       total_news?: number
@@ -292,7 +292,7 @@ export const marketApi = {
    * 获取热点新闻统计
    */
   getHotNewsStats: () =>
-    httpClient.get<HotNewsStats>('/market/hot_news/stats'),
+    api.get<HotNewsStats>('/market/hot_news/stats'),
 }
 
 // 热点新闻类型
