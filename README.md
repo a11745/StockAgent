@@ -276,6 +276,29 @@ npm run dev
 
 ---
 
+### 6. 脚本启动
+
+```bash
+## 进入根目录
+cd stockAgent
+.\manager.ps1
+
+[1] Start Web
+[2] Start Inference
+[3] Start DataSync
+[4] Start Listener
+[5] Start Backtest
+[6] Start Frontend
+
+[A] Start all backend nodes
+[F] Start full stack (backend + frontend)
+
+```
+---
+
+此处可按需启动 也全部启动（需要先启动redis以及mogodb）
+
+
 ## 📦 项目结构
 
 ```
@@ -438,11 +461,4 @@ docker compose up -d mongodb redis web data-sync backtest
 
 <div align="center">
   <p>如果这个项目对你有帮助，请给一个 ⭐ Star 支持一下！</p>
-</div>
-
-## QQ群
-
-![Dashboard](docs/images/QQ群二维码.jpg)
-<div align="center">
-  <p>有问题可进Q群交流</p>
 </div>
