@@ -20,7 +20,7 @@ import platform
 import hashlib
 import uuid
 
-from .base import BaseManager
+from core.base import BaseManager
 from ..settings import settings
 
 

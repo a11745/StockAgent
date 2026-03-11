@@ -16,7 +16,7 @@ Example:
     3. 调用: 直接使用全局单例的方法
 """
 
-from .base import BaseManager
+from core.base import BaseManager
 from .redis_manager import RedisManager, redis_manager
 from .mongo_manager import MongoManager, mongo_manager
 from .tushare_manager import TushareManager, tushare_manager
@@ -27,6 +27,7 @@ from .theme_manager import ThemeManager, theme_manager, ThemeStatus
 from .prompt_manager import PromptManager, prompt_manager
 from .notification_manager import NotificationManager, notification_manager
 from .akshare_manager import AKShareManager, akshare_manager
+from .data_source_manager import DataSourceManager, data_source_manager
 
 __all__ = [
     # 基类
@@ -44,6 +45,7 @@ __all__ = [
     "PromptManager",
     "NotificationManager",
     "AKShareManager",
+    "DataSourceManager",
     # 全局单例 (推荐使用)
     "redis_manager",
     "mongo_manager",
@@ -55,6 +57,7 @@ __all__ = [
     "prompt_manager",
     "notification_manager",
     "akshare_manager",
+    "data_source_manager",
 ]
 
 
@@ -65,14 +68,16 @@ async def initialize_all_managers() -> None:
     初始化顺序:
     1. Redis (基础设施)
     2. MongoDB (基础设施)
-    3. Tushare (数据源)
-    4. LLM (AI 服务)
-    5. Milvus (向量数据库)
-    6. Prompt (提示词管理)
-    7. Notification (通知服务)
+    3. DataSource (统一数据源管理)
+    4. Tushare (数据源 - 保留兼容)
+    5. LLM (AI 服务)
+    6. Milvus (向量数据库)
+    7. Prompt (提示词管理)
+    8. Notification (通知服务)
     """
     await redis_manager.initialize()
     await mongo_manager.initialize()
+    await data_source_manager.initialize()
     await tushare_manager.initialize()
     await llm_manager.initialize()
     await milvus_manager.initialize()
@@ -87,6 +92,7 @@ async def shutdown_all_managers() -> None:
     await milvus_manager.shutdown()
     await llm_manager.shutdown()
     await tushare_manager.shutdown()
+    await data_source_manager.shutdown()
     await mongo_manager.shutdown()
     await redis_manager.shutdown()
 
@@ -96,6 +102,7 @@ async def health_check_all() -> dict[str, bool]:
     return {
         "redis": await redis_manager.health_check(),
         "mongo": await mongo_manager.health_check(),
+        "data_source": await data_source_manager.health_check(),
         "tushare": await tushare_manager.health_check(),
         "llm": await llm_manager.health_check(),
         "milvus": await milvus_manager.health_check(),

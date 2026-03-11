@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 import httpx
 
-from .base import BaseManager
+from core.base import BaseManager
 from ..settings import settings
 from ..protocols import StrategyAlert
 

@@ -6,16 +6,16 @@
 """
 
 import asyncio
-from typing import Optional, List, Type
+from typing import Optional, List, Type, Union
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from nodes.base import BaseNode
+from core.base import BaseNode, ScheduledJob, BaseCollector, BaseTask, BaseGenerator
 from core.protocols import NodeType
-from core.managers import redis_manager, mongo_manager, tushare_manager
-from core.base import BaseCollector
+from core.managers import redis_manager, mongo_manager, data_source_manager, llm_manager, milvus_manager
 
+# 数据采集器 (Collectors)
 from .collectors import (
     StockBasicCollector,
     StockDailyCollector,
@@ -25,10 +25,23 @@ from .collectors import (
     MoneyflowIndustryCollector,
     MoneyflowConceptCollector,
     LimitListCollector,
-    DailyStatsCollector,
-    NewsCollector,
+    StockNewsCollector,
     FinaIndicatorCollector,
     HotNewsCollector,
+    MultiSourceCollector,
+)
+
+# 处理任务 (Tasks)
+from .tasks import (
+    DailyStatsTask,
+    EventClusteringTask,
+    NewsLifecycleTask,
+)
+
+# 生成任务 (Generators)
+from .generators import (
+    MorningReportGenerator,
+    NoonReportGenerator,
 )
 
 
@@ -55,7 +68,7 @@ class DataSyncNode(BaseNode):
         super().__init__(node_id, rpc_port or settings.rpc.data_sync_port)
         
         self._scheduler: Optional[AsyncIOScheduler] = None
-        self._collectors: List[BaseCollector] = []
+        self._jobs: List[ScheduledJob] = []
     
     async def start(self) -> None:
         """启动数据同步节点"""
@@ -63,25 +76,27 @@ class DataSyncNode(BaseNode):
         self.logger.info("Initializing managers...")
         await redis_manager.initialize()      # 心跳注册 + 分布式锁
         await mongo_manager.initialize()      # 数据存储
-        await tushare_manager.initialize()    # 数据源
+        await data_source_manager.initialize()  # 统一数据源管理
+        await llm_manager.initialize()        # LLM (事件聚类)
+        await milvus_manager.initialize()     # 向量存储 (事件聚类)
         
         # 启动 RPC 服务器
         await self._start_rpc_server()
         
-        # 注册采集器
-        self._register_collectors()
+        # 注册定时任务
+        self._register_jobs()
         
         # 创建调度器
         self._scheduler = AsyncIOScheduler()
         
         # 注册采集任务
-        for collector in self._collectors:
-            self._schedule_collector(collector)
+        for job in self._jobs:
+            self._schedule_job(job)
         
         # 启动调度器
         self._scheduler.start()
         
-        self.logger.info(f"Data sync node started with {len(self._collectors)} collectors")
+        self.logger.info(f"Data sync node started with {len(self._jobs)} jobs")
     
     async def stop(self) -> None:
         """停止节点"""
@@ -93,83 +108,93 @@ class DataSyncNode(BaseNode):
         # 首次启动时执行一次同步
         if self.settings.debug:
             self.logger.info("Running initial sync...")
-            await self._run_all_collectors()
+            await self._run_all_jobs()
         
         # 保持运行
         while self._running:
             await asyncio.sleep(60)
     
-    def _register_collectors(self) -> None:
-        """注册所有采集器"""
-        collector_classes: List[Type[BaseCollector]] = [
+    def _register_jobs(self) -> None:
+        """注册所有定时任务"""
+        job_classes: List[Type[ScheduledJob]] = [
+            # 数据采集 (Collectors)
             StockBasicCollector,
             StockDailyCollector,
-            DailyBasicCollector,  # 每日指标采集器（PE/PB/换手率/市值），在 stock_daily 之后
+            DailyBasicCollector,
             IndexBasicCollector,
             IndexDailyCollector,
             MoneyflowIndustryCollector,
             MoneyflowConceptCollector,
             LimitListCollector,
-            DailyStatsCollector,  # 统计采集器放在最后，确保依赖数据已同步
-            NewsCollector,
-            FinaIndicatorCollector,  # 财务指标采集器，每月1号更新
-            HotNewsCollector,  # 热点新闻采集器，每半小时更新
+            StockNewsCollector,
+            FinaIndicatorCollector,
+            HotNewsCollector,
+            MultiSourceCollector,
+            
+            # 处理任务 (Tasks)
+            DailyStatsTask,         # 统计，确保依赖数据已同步
+            EventClusteringTask,    # 事件聚类 (LLM 深度去重)
+            NewsLifecycleTask,      # 数据生命周期管理
+            
+            # 生成任务 (Generators)
+            MorningReportGenerator,  # 早报 (8:50)
+            NoonReportGenerator,     # 午报 (13:50)
         ]
         
-        for cls in collector_classes:
-            collector = cls()
-            self._collectors.append(collector)
-            self.logger.info(f"Registered collector: {collector.name}")
+        for cls in job_classes:
+            job = cls()
+            self._jobs.append(job)
+            self.logger.info(f"Registered job: {job.name}")
     
-    def _schedule_collector(self, collector: BaseCollector) -> None:
-        """调度采集器"""
-        async def job():
-            await self._run_collector_with_lock(collector)
+    def _schedule_job(self, job: ScheduledJob) -> None:
+        """调度任务"""
+        async def run_job():
+            await self._run_job_with_lock(job)
         
         # 解析 cron 表达式
-        trigger = CronTrigger.from_crontab(collector.schedule)
+        trigger = CronTrigger.from_crontab(job.schedule)
         
         self._scheduler.add_job(
-            job,
+            run_job,
             trigger=trigger,
-            id=collector.name,
-            name=f"Collector: {collector.name}",
+            id=job.name,
+            name=f"Job: {job.name}",
             replace_existing=True,
         )
     
-    async def _run_collector_with_lock(self, collector: BaseCollector) -> dict:
+    async def _run_job_with_lock(self, job: ScheduledJob) -> dict:
         """
-        使用分布式锁运行采集器
+        使用分布式锁运行任务
         
-        防止多个 Data Agent 重复抓取同一数据。
+        防止多个节点重复执行同一任务。
         """
         from datetime import date
         
         today = date.today().strftime("%Y%m%d")
-        lock_key = f"sync:{collector.name}:{today}"
+        lock_key = f"sync:{job.name}:{today}"
         
         # 尝试获取锁
         lock = await redis_manager.try_lock(lock_key, timeout=600)  # 10 分钟超时
         
         if lock is None:
             self.logger.info(
-                f"Collector {collector.name} skipped: "
-                f"another node is syncing (lock={lock_key})"
+                f"Job {job.name} skipped: "
+                f"another node is running (lock={lock_key})"
             )
             return {"success": False, "skipped": True, "reason": "lock_held"}
         
         try:
-            self.logger.info(f"Running collector: {collector.name} (lock acquired)")
-            result = await collector.run()
+            self.logger.info(f"Running job: {job.name} (lock acquired)")
+            result = await job.run()
             
             if result["success"]:
                 self.logger.info(
-                    f"Collector {collector.name} completed: "
+                    f"Job {job.name} completed: "
                     f"{result['count']} records, {result['duration_ms']:.2f}ms"
                 )
             else:
                 self.logger.error(
-                    f"Collector {collector.name} failed: {result.get('error')}"
+                    f"Job {job.name} failed: {result.get('error')}"
                 )
             
             return result
@@ -179,25 +204,30 @@ class DataSyncNode(BaseNode):
             await lock.release()
             self.logger.debug(f"Lock released: {lock_key}")
     
-    async def _run_all_collectors(self) -> None:
-        """运行所有采集器"""
-        for collector in self._collectors:
+    async def _run_all_jobs(self) -> None:
+        """运行所有任务（跳过 run_at_startup=False 的任务）"""
+        for job in self._jobs:
+            # 跳过不在启动时运行的任务
+            if not getattr(job, 'run_at_startup', True):
+                self.logger.info(f"Job {job.name} skipped (run_at_startup=False)")
+                continue
+            
             try:
-                await self._run_collector_with_lock(collector)
+                await self._run_job_with_lock(job)
             except Exception as e:
-                self.logger.exception(f"Collector {collector.name} error: {e}")
+                self.logger.exception(f"Job {job.name} error: {e}")
     
-    async def run_collector(self, collector_name: str) -> dict:
-        """手动运行指定采集器"""
-        for collector in self._collectors:
-            if collector.name == collector_name:
-                return await self._run_collector_with_lock(collector)
+    async def run_job(self, job_name: str) -> dict:
+        """手动运行指定任务"""
+        for job in self._jobs:
+            if job.name == job_name:
+                return await self._run_job_with_lock(job)
         
-        return {"success": False, "error": f"Collector not found: {collector_name}"}
+        return {"success": False, "error": f"Job not found: {job_name}"}
     
-    def get_collector_status(self) -> List[dict]:
-        """获取所有采集器状态"""
-        return [c.status for c in self._collectors]
+    def get_job_status(self) -> List[dict]:
+        """获取所有任务状态"""
+        return [j.status for j in self._jobs]
     
     # ==================== RPC 方法 ====================
     
@@ -224,8 +254,8 @@ class DataSyncNode(BaseNode):
         
         self.logger.info(f"[{trace_id}] RPC refresh_hot_news: source={source_id or 'ALL'}")
         
-        # 从已注册的采集器中获取热点新闻采集器
-        hot_news_collector = self._get_collector("hot_news")
+        # 从已注册的任务中获取热点新闻采集器
+        hot_news_collector = self._get_job("hot_news")
         if not hot_news_collector:
             return {"success": False, "error": "HotNewsCollector not found"}
         
@@ -242,11 +272,11 @@ class DataSyncNode(BaseNode):
                 "error": str(e),
             }
     
-    def _get_collector(self, name: str) -> Optional[BaseCollector]:
-        """根据名称获取采集器"""
-        for collector in self._collectors:
-            if collector.name == name:
-                return collector
+    def _get_job(self, name: str) -> Optional[ScheduledJob]:
+        """根据名称获取任务"""
+        for job in self._jobs:
+            if job.name == name:
+                return job
         return None
 
 

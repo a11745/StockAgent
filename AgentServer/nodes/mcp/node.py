@@ -6,7 +6,7 @@ import asyncio
 from typing import Optional, Dict, Type
 import json
 
-from nodes.base import BaseNode
+from core.base import BaseNode
 from core.protocols import NodeType, ToolRequest, ToolResponse
 from core.managers import (
     redis_manager,

@@ -14,7 +14,7 @@ import time
 
 import pandas as pd
 
-from .base import BaseManager
+from core.base import BaseManager
 from ..settings import settings
 
 

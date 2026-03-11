@@ -13,7 +13,7 @@ from datetime import datetime, date, time
 import uuid
 import logging
 
-from nodes.base import BaseNode
+from core.base import BaseNode
 from core.protocols import (
     NodeType,
     StrategySubscription,

@@ -9,7 +9,7 @@ Core: 核心基础设施层
 """
 
 from .settings import settings, Settings
-from .base import BaseTool, BaseCollector, ToolResult
+from .base import BaseTool, BaseCollector, ToolResult, BaseManager, BaseNode
 from .protocols import (
     NodeType,
     TaskType,
@@ -27,6 +27,8 @@ __all__ = [
     "settings",
     "Settings",
     # 基类
+    "BaseManager",
+    "BaseNode",
     "BaseTool",
     "BaseCollector",
     "ToolResult",

@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 
 import uvicorn
 
-from nodes.base import BaseNode
+from core.base import BaseNode
 from core.protocols import NodeType
 from core.settings import settings
 from core.managers import redis_manager

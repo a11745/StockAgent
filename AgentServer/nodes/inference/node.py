@@ -7,7 +7,7 @@ from typing import Optional
 from datetime import datetime
 import json
 
-from nodes.base import BaseNode
+from core.base import BaseNode
 from core.protocols import (
     NodeType,
     AgentTask,

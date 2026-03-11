@@ -7,28 +7,15 @@
 - 获取调仓日期列表
 """
 
-from enum import Enum
 from typing import List, Set, Optional
 from datetime import datetime, timedelta
 import logging
 
 from core.managers import mongo_manager, tushare_manager
+from common.enums import UniverseType, ExcludeRule
 
 
 logger = logging.getLogger(__name__)
-
-
-class UniverseType(str, Enum):
-    """股票池类型"""
-    ALL_A = "all_a"          # 全A股
-
-
-class ExcludeRule(str, Enum):
-    """排除规则"""
-    ST = "st"                # ST股票
-    NEW_STOCK = "new_stock"  # 次新股 (上市不满1年)
-    LIMIT_UP = "limit_up"    # 涨停股 (一字板)
-    LIMIT_DOWN = "limit_down" # 跌停股
 
 
 class UniverseManager:

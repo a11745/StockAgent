@@ -25,8 +25,8 @@ from core.protocols import (
     StrategySubscription,
     StrategyAlert,
     MarketSnapshot,
-    StrategyType,
 )
+from common.enums import StrategyType
 from core.managers import mongo_manager
 
 

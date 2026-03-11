@@ -13,22 +13,12 @@
 - 技术因子: 基于技术指标
 """
 
-from enum import Enum
 from typing import Callable, Dict, Optional, List
 from dataclasses import dataclass
 import pandas as pd
 import numpy as np
 
-
-class FactorCategory(str, Enum):
-    """因子分类"""
-    MOMENTUM = "momentum"      # 动量因子
-    VALUE = "value"           # 价值因子
-    QUALITY = "quality"       # 质量因子
-    GROWTH = "growth"         # 成长因子
-    VOLATILITY = "volatility" # 波动因子
-    LIQUIDITY = "liquidity"   # 流动性因子
-    TECHNICAL = "technical"   # 技术因子
+from common.enums import FactorCategory
 
 
 @dataclass

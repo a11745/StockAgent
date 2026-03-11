@@ -10,7 +10,7 @@ import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-from .base import BaseManager
+from core.base import BaseManager
 
 
 class AKShareManager(BaseManager):

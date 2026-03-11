@@ -84,6 +84,14 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '热点追踪' },
       },
       
+      // 报告回顾
+      {
+        path: 'reports',
+        name: 'Reports',
+        component: () => import('@/views/report/ReportView.vue'),
+        meta: { title: '报告回顾' },
+      },
+      
       // 量化回测 - 单股回测
       {
         path: 'backtest',

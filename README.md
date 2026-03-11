@@ -21,13 +21,15 @@
 
 ## 📖 项目简介
 
-**StockAgent** 是一个面向 A 股市场的智能量化分析平台，融合了 **大语言模型 (LLM)**、**多因子选股**、**量化回测** 等技术，帮助投资者进行智能化的市场分析和策略验证。
+**StockAgent** 是一个面向 A 股市场的智能量化分析平台，融合了 **大语言模型 (LLM)**、**多因子选股**、**量化回测**、**多源新闻聚合** 等技术，帮助投资者进行智能化的市场分析和策略验证。
 
 ### ✨ 核心亮点
 
 - 🤖 **AI 智能分析** - 集成 GPT-4、DeepSeek、通义千问等多种 LLM，提供智能股票分析报告
 - 📊 **多因子选股** - 内置 17+ 选股因子，支持动量、价值、质量、成长等多维度策略
 - 📈 **向量化回测** - 高性能回测引擎，支持 A 股 T+1 规则、佣金印花税、涨跌停限制
+- 📰 **多源新闻聚合** - 自动采集财联社、澎湃、国务院、工信部等 10+ 新闻源
+- 📋 **智能报告生成** - 每日早报/午报自动生成，热点事件聚类分析
 - 🔄 **实时数据同步** - 自动同步 Tushare 行情数据，支持定时调度
 - 🌐 **分布式架构** - 微服务设计，各节点可独立扩展
 - 🎨 **现代化 UI** - Vue3 + Element Plus 构建的专业级交易界面
@@ -73,17 +75,17 @@
 ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
 │  Data Sync    │     │   Inference   │     │   Backtest    │
 │    Node       │     │     Node      │     │     Node      │
-│ ─────────────│     │ ─────────────│     │ ─────────────│
-│ • 行情同步    │     │ • LLM 推理    │     │ • 单股回测    │
-│ • 定时调度    │     │ • 智能分析    │     │ • 因子选股    │
-│ • 数据清洗    │     │ • 报告生成    │     │ • 组合回测    │
+│ ─────────────│     │ ─────────────│       │ ───────────── │
+│ • 行情同步    │     │ • LLM 推理    │      │ • 单股回测     │
+│ • 新闻采集    │     │ • 智能分析    │      │ • 因子选股     │
+│ • 报告生成    │     │ • 报告生成    │      │ • 组合回测     │
 └───────┬───────┘     └───────┬───────┘     └───────┬───────┘
         │                     │                     │
         └─────────────────────┼─────────────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MongoDB • Redis • Milvus                      │
-│               数据存储 • 缓存队列 • 向量检索                        │
+│                    MongoDB • Redis • Milvus                     │
+│               数据存储 • 缓存队列 • 向量检索                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -92,8 +94,8 @@
 | 节点 | 职责 | 可扩展 |
 |------|------|--------|
 | **Web Node** | HTTP API 网关、用户认证、请求路由 | ✅ |
-| **Data Sync Node** | Tushare 数据同步、定时调度、增量更新 | ❌ (单实例) |
-| **Inference Node** | LLM 推理、智能分析、报告生成 | ✅ |
+| **Data Sync Node** | 行情同步、新闻采集、报告生成 | ❌ (单实例) |
+| **Inference Node** | LLM 推理、智能分析 | ✅ |
 | **Backtest Node** | 量化回测、因子计算、绩效分析 | ✅ |
 | **MCP Node** | Model Context Protocol 服务 | ❌ |
 | **Listener Node** | 实时行情监听、异动提醒 | ❌ |
@@ -106,8 +108,22 @@
 
 - **大盘概览** - 主要指数行情、涨跌分布、成交热力图
 - **板块分析** - 行业/概念板块资金流向、强弱对比
-- **热点追踪** - 多源新闻聚合（财联社、36氪、雪球等）
 - **涨跌停分析** - 涨停板复盘、连板统计、封板强度
+
+### 📰 新闻聚合
+
+多源新闻自动采集，按分组差异化调度：
+
+| 分组 | 采集源 | 采集间隔 |
+|------|--------|----------|
+| 财经快讯 | 财联社、华尔街见闻、金十数据 | 5 分钟 |
+| 财经讨论 | 雪球、东方财富 | 10 分钟 |
+| 政策文件 | 国务院、工信部 | 每天 |
+| 科技综合 | 澎湃新闻、稀土掘金 | 60 分钟 |
+
+- **热点追踪** - 实时热榜、多源聚合
+- **事件聚类** - LLM 智能分析，相似新闻自动归类
+- **报告回顾** - 历史报告查询，按日期筛选
 
 ### 🔬 智能分析
 
@@ -115,6 +131,7 @@
 - **技术面诊断** - 自动识别 K 线形态、支撑压力位
 - **基本面评估** - 财务指标评分、估值对比
 - **资金面解读** - 主力资金流向、龙虎榜解析
+- **每日报告** - 早报/午报自动生成推送
 
 ### 📈 量化回测
 
@@ -157,10 +174,11 @@
 | **Python 3.11+** | 主开发语言 |
 | **FastAPI** | Web 框架、REST API |
 | **gRPC** | 节点间通信 |
-| **Pydantic** | 数据验证 |
+| **Pydantic** | 数据验证、配置管理 |
 | **APScheduler** | 定时任务调度 |
 | **Pandas/NumPy** | 数据处理、向量化计算 |
 | **LangChain** | LLM 应用框架 |
+| **httpx** | 异步 HTTP 客户端 |
 
 ### 前端
 
@@ -180,13 +198,16 @@
 |------|------|
 | **MongoDB 7** | 主数据库 |
 | **Redis 7** | 缓存、消息队列、分布式锁 |
-| **Milvus** | 向量数据库 (可选) |
+| **Milvus** | 向量数据库 (语义搜索) |
 
 ### 数据源
 
 | 数据源 | 数据类型 |
 |--------|----------|
 | **Tushare Pro** | A股行情、财务、资金流向等 |
+| **财联社** | 财经快讯、电报 |
+| **澎湃新闻** | 综合热榜、财经资讯 |
+| **国务院/工信部** | 政策文件、公告 |
 
 ### LLM 支持
 
@@ -221,14 +242,14 @@ cd StockAgent
 ```bash
 cd AgentServer/deploy
 
-# 方式 A：仅启动必需服务（回测、数据同步等基础功能）
-docker compose up -d mongodb redis
-
-# 方式 B：启动全部服务（包含 AI 智能分析的语义搜索）
+# 启动全部服务 (推荐)
 docker compose up -d mongodb redis milvus
+
+# 或仅启动核心服务 (不含向量搜索)
+docker compose up -d mongodb redis
 ```
 
-> 💡 **关于 Milvus**：向量数据库用于 AI 智能分析中的语义搜索。基础功能（量化回测、数据同步）不需要它。
+> 💡 **Milvus** 用于事件聚类、语义搜索等 AI 功能。如不需要这些功能可跳过。
 
 ### 3. 配置环境变量
 
@@ -242,47 +263,40 @@ cp .env.example .env
 - `TUSHARE_TOKEN` - [Tushare Pro](https://tushare.pro) 账号 Token
 - `LLM_API_KEY` - LLM 服务的 API Key
 
-### 4. 启动后端
+### 4. 安装依赖
 
 ```bash
 cd AgentServer
 
+# 创建虚拟环境
+python -m venv venv
+
+# 激活虚拟环境
+.\venv\Scripts\activate    # Windows
+# source venv/bin/activate  # Linux/Mac
+
 # 安装依赖
 pip install -r requirements.txt
-
-# 启动 Web 节点
-NODE_TYPE=web python main.py
-
-# 新终端：启动数据同步节点
-NODE_TYPE=data_sync python main.py
-
-# 新终端：启动回测节点 (可选)
-NODE_TYPE=backtest python main.py
 ```
 
-### 5. 启动前端
+前端依赖：
 
 ```bash
 cd frontend
-
-# 安装依赖
 npm install
-
-# 开发模式
-npm run dev
 ```
 
-访问 http://localhost:5173
+### 5. 启动服务
 
----
+#### 方式 A：使用管理脚本 (推荐)
 
-### 6. 脚本启动
-
-```bash
-## 进入根目录
+```powershell
+# 进入项目根目录
 cd stockAgent
 .\manager.ps1
+```
 
+```
 [1] Start Web
 [2] Start Inference
 [3] Start DataSync
@@ -292,12 +306,31 @@ cd stockAgent
 
 [A] Start all backend nodes
 [F] Start full stack (backend + frontend)
-
 ```
+
+按需选择启动，或选择 `[F]` 启动全部。
+
+#### 方式 B：手动启动
+
+```bash
+cd AgentServer
+
+# 启动 Web 节点
+NODE_TYPE=web python main.py
+
+# 新终端：启动数据同步节点
+NODE_TYPE=data_sync python main.py
+
+# 新终端：启动前端
+cd frontend && npm run dev
+```
+
+### 6. 访问服务
+
+- 前端界面: http://localhost:5173
+- API 文档: http://localhost:8000/docs
+
 ---
-
-此处可按需启动 也全部启动（需要先启动redis以及mogodb）
-
 
 ## 📦 项目结构
 
@@ -311,59 +344,40 @@ StockAgent/
 │   ├── core/                    # 核心模块
 │   │   ├── settings.py          # 配置管理
 │   │   ├── protocols.py         # 协议定义
-│   │   ├── rpc.py               # RPC 通信
-│   │   ├── logging.py           # 日志配置
-│   │   └── managers/            # 管理器 (MongoDB, Redis, Tushare)
+│   │   ├── rpc/                 # gRPC 通信
+│   │   └── managers/            # 管理器 (MongoDB, Redis, DataSource)
+│   │
+│   ├── src/                     # 业务逻辑
+│   │   ├── data_sources/        # 数据源适配器
+│   │   └── collector/           # 新闻采集框架
 │   │
 │   ├── nodes/                   # 节点实现
-│   │   ├── base.py              # 基类
 │   │   ├── web/                 # Web 节点 (FastAPI)
-│   │   │   ├── node.py
 │   │   │   └── api/             # API 路由
 │   │   ├── data_sync/           # 数据同步节点
-│   │   │   ├── node.py
-│   │   │   └── collectors/      # 数据采集器
+│   │   │   ├── collectors/      # 数据采集器
+│   │   │   │   ├── stock/       # 股票数据
+│   │   │   │   └── news/        # 新闻采集
+│   │   │   ├── tasks/           # 定时任务
+│   │   │   └── generators/      # 报告生成
 │   │   ├── inference/           # 推理节点
 │   │   ├── backtest_engine/     # 回测引擎
-│   │   │   ├── backtester.py    # 向量化回测
-│   │   │   ├── factors.py       # 因子数据
-│   │   │   ├── performance.py   # 绩效分析
-│   │   │   └── factor_selection/# 因子选股模块
 │   │   ├── mcp/                 # MCP 节点
 │   │   └── listener/            # 监听节点
 │   │
-│   ├── common/                  # 公共模块
-│   │   └── utils/               # 工具函数
-│   │
-│   ├── scripts/                 # 脚本工具
-│   │   ├── sync_stock_daily.py  # 同步日线数据
-│   │   ├── sync_daily_basic.py  # 同步每日指标
-│   │   └── update_sync_date.py  # 更新同步记录
-│   │
+│   ├── scripts/                 # 工具脚本
 │   └── deploy/                  # 部署配置
-│       ├── docker-compose.yml   # Docker Compose
-│       ├── Dockerfile           # 统一镜像
-│       ├── README.md            # 部署文档
-│       ├── mongodb/             # MongoDB 配置
-│       ├── redis/               # Redis 配置
-│       └── vector_db/           # Milvus 配置
 │
 ├── frontend/                    # 前端应用
 │   ├── src/
 │   │   ├── api/                 # API 封装
-│   │   ├── components/          # 公共组件
 │   │   ├── views/               # 页面视图
-│   │   │   ├── dashboard/       # 仪表盘
-│   │   │   ├── market/          # 市场分析
-│   │   │   ├── backtest/        # 量化回测
-│   │   │   ├── analysis/        # 智能分析
-│   │   │   └── ...
 │   │   ├── stores/              # 状态管理
-│   │   ├── router/              # 路由配置
-│   │   └── styles/              # 全局样式
+│   │   └── router/              # 路由配置
 │   └── ...
 │
 ├── manager.ps1                  # Windows 管理脚本
+├── backup.ps1                   # 备份脚本
 └── README.md                    # 本文件
 ```
 
@@ -415,7 +429,11 @@ docker compose up -d mongodb redis web data-sync backtest
 - [x] 数据同步模块
 - [x] 单股量化回测
 - [x] 因子选股回测
+- [x] 多源新闻采集
 - [x] 热点新闻聚合
+- [x] 事件聚类分析
+- [x] 每日报告生成
+- [x] 报告回顾功能
 - [ ] 实时行情 WebSocket
 - [ ] 策略可视化编排
 - [ ] 自定义因子编写
@@ -462,5 +480,3 @@ docker compose up -d mongodb redis web data-sync backtest
 <div align="center">
   <p>如果这个项目对你有帮助，请给一个 ⭐ Star 支持一下！</p>
 </div>
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/qilihei/StockAgent)

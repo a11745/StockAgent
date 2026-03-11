@@ -9,19 +9,9 @@
 
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from enum import Enum
 
-from core.managers.base import BaseManager
-
-
-class ThemeStatus(str, Enum):
-    """板块状态"""
-    MAIN_THEME = "main_theme"       # 当前主线
-    STRONG_FOCUS = "strong_focus"   # 强势关注
-    RISING = "rising"               # 上升中
-    ROTATING = "rotating"           # 轮动中
-    FADING = "fading"               # 衰退中
-    NORMAL = "normal"               # 普通
+from core.base import BaseManager
+from common.enums import ThemeStatus
 
 
 class ThemeManager(BaseManager):

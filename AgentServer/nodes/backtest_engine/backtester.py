@@ -10,19 +10,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
-from enum import Enum
 
 import pandas as pd
 import numpy as np
 
+from common.enums import TradeDirection
 from .factors import FactorData
-
-
-class TradeDirection(Enum):
-    """交易方向"""
-    BUY = "buy"
-    SELL = "sell"
-    HOLD = "hold"
 
 
 @dataclass

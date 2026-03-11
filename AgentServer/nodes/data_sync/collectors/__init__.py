@@ -1,31 +1,47 @@
 """
-数据采集器
+data_sync 数据采集器
+
+只包含真正的数据采集任务（从外部获取数据）。
+处理任务和生成任务分别在 tasks/ 和 generators/ 目录。
+
+目录结构:
+- stock/  股票数据采集 (行情、财务、资金流向)
+- news/   新闻采集 (财经新闻、政策文件)
 """
 
-from .stock_basic import StockBasicCollector
-from .stock_daily import StockDailyCollector
-from .daily_basic import DailyBasicCollector
-from .index_basic import IndexBasicCollector
-from .index_daily import IndexDailyCollector
-from .moneyflow_industry import MoneyflowIndustryCollector
-from .moneyflow_concept import MoneyflowConceptCollector
-from .limit_list import LimitListCollector
-from .daily_stats import DailyStatsCollector
-from .news import NewsCollector
-from .fina_indicator import FinaIndicatorCollector
-from .hot_news import HotNewsCollector
+# 股票数据采集
+from .stock import (
+    StockBasicCollector,
+    StockDailyCollector,
+    DailyBasicCollector,
+    FinaIndicatorCollector,
+    IndexBasicCollector,
+    IndexDailyCollector,
+    LimitListCollector,
+    MoneyflowConceptCollector,
+    MoneyflowIndustryCollector,
+)
+
+# 新闻采集
+from .news import (
+    StockNewsCollector,
+    HotNewsCollector,
+    MultiSourceCollector,
+)
 
 __all__ = [
+    # 股票数据
     "StockBasicCollector",
     "StockDailyCollector",
     "DailyBasicCollector",
+    "FinaIndicatorCollector",
     "IndexBasicCollector",
     "IndexDailyCollector",
-    "MoneyflowIndustryCollector",
-    "MoneyflowConceptCollector",
     "LimitListCollector",
-    "DailyStatsCollector",
-    "NewsCollector",
-    "FinaIndicatorCollector",
+    "MoneyflowConceptCollector",
+    "MoneyflowIndustryCollector",
+    # 新闻采集
+    "StockNewsCollector",
     "HotNewsCollector",
+    "MultiSourceCollector",
 ]

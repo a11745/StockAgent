@@ -14,7 +14,7 @@ from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo import ASCENDING, DESCENDING, IndexModel, UpdateOne, InsertOne
 
-from .base import BaseManager
+from core.base import BaseManager
 from ..settings import settings
 
 
@@ -215,8 +215,11 @@ class MongoManager(BaseManager):
         
         # 新闻表
         await self._db.news.create_indexes([
-            IndexModel([("_key", ASCENDING)], unique=True),
+            IndexModel([("_key", ASCENDING)], unique=True, sparse=True),  # sparse: 忽略无 _key 的文档
             IndexModel([("datetime", DESCENDING)]),
+            IndexModel([("content_hash", ASCENDING)], unique=True, sparse=True),  # 内容去重
+            IndexModel([("collect_time", DESCENDING)]),  # 按采集时间排序
+            IndexModel([("event_id", ASCENDING)], sparse=True),  # 事件聚类
             IndexModel([("title", "text"), ("content", "text")]),  # 全文索引
         ])
         

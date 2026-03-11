@@ -20,7 +20,7 @@ import redis.asyncio as aioredis
 from redis.asyncio.client import PubSub
 from redis.asyncio.connection import ConnectionPool
 
-from .base import BaseManager
+from core.base import BaseManager
 from ..settings import settings
 
 

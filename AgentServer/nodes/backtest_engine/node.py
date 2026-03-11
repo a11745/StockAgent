@@ -12,7 +12,7 @@ import traceback
 
 import pandas as pd
 
-from nodes.base import BaseNode
+from core.base import BaseNode
 from common.utils import convert_numpy_types
 from core.protocols import NodeType
 from core.managers import redis_manager, mongo_manager, tushare_manager

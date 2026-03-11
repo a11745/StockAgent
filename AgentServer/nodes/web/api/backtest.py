@@ -15,13 +15,13 @@ import uuid
 import logging
 from datetime import datetime
 from typing import Dict, List, Any, Optional
-from enum import Enum
 
 from fastapi import APIRouter, HTTPException, Query, Depends, Request
 from pydantic import BaseModel, Field, ValidationError
 
 from core.managers import mongo_manager
 from core.rpc import RPCClient
+from common.enums import TaskStatus
 from .auth import get_current_user_id
 
 router = APIRouter(prefix="/backtest", tags=["Backtest"])
@@ -29,16 +29,6 @@ logger = logging.getLogger("api.backtest")
 
 
 # ==================== 数据模型 ====================
-
-
-class TaskStatus(str, Enum):
-    """任务状态"""
-    PENDING = "pending"
-    QUEUED = "queued"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
 
 
 class BacktestRequest(BaseModel):

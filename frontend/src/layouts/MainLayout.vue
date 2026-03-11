@@ -36,6 +36,7 @@ import {
   Sunny,
   Moon,
   Promotion,
+  Document,
 } from '@element-plus/icons-vue'
 import { useAuth } from '@/hooks'
 import { useUserStore, useTaskStore, useThemeStore } from '@/stores'
@@ -70,6 +71,7 @@ const menuItems = [
   { path: '/market', icon: Histogram, title: '行情分析' },
   { path: '/sector-strategy', icon: TrendCharts, title: '板块分析' },
   { path: '/hot-news', icon: Promotion, title: '热点追踪' },
+  { path: '/reports', icon: Document, title: '报告回顾' },
   { path: '/backtest', icon: DataAnalysis, title: '单股回测' },
   { path: '/factor-selection', icon: DataAnalysis, title: '因子选股' },
   { path: '/analysis', icon: DataAnalysis, title: '分析任务' },

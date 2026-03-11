@@ -147,6 +147,11 @@ class LLMSettings(BaseSettings):
     """LLM 模型配置
     
     环境变量: LLM_PROVIDER, LLM_API_KEY, LLM_API_BASE, LLM_MODEL_NAME, ...
+    
+    模型路由:
+    - fast_model: 简单任务 (分类、提取)
+    - balanced_model: 一般任务 (摘要、问答)
+    - quality_model: 复杂任务 (分析、报告)
     """
     model_config = SettingsConfigDict(
         env_prefix="LLM_",
@@ -155,22 +160,34 @@ class LLMSettings(BaseSettings):
         extra="ignore",
     )
     
-    # 模型提供商: openai, dashscope (阿里), zhipu, ollama, deepseek
+    # 主模型提供商: openai, dashscope (阿里), zhipu, ollama, deepseek
     provider: Literal["openai", "dashscope", "zhipu", "ollama", "deepseek"] = "dashscope"
     
     # API 配置
     api_key: Optional[SecretStr] = None
     api_base: Optional[str] = None
     
-    # 模型名称
+    # 主模型名称
     model_name: str = "qwen-plus"
     embedding_model: str = "text-embedding-v3"
     
+    # 模型路由 (可选，不配置则使用主模型)
+    fast_model: Optional[str] = None       # 简单任务用的模型
+    balanced_model: Optional[str] = None   # 一般任务用的模型
+    quality_model: Optional[str] = None    # 复杂任务用的模型
+    
     # Embedding 单独配置 (可选，如果 provider 不支持 embedding)
-    # 例如 DeepSeek 不支持 embedding，需要用 DashScope
     embedding_provider: Optional[Literal["openai", "dashscope", "zhipu", "ollama"]] = None
     embedding_api_key: Optional[SecretStr] = None
     embedding_api_base: Optional[str] = None
+    
+    # 备用 Provider 配置 (用于多模型路由)
+    openai_api_key: Optional[SecretStr] = None
+    openai_api_base: Optional[str] = None
+    zhipu_api_key: Optional[SecretStr] = None
+    dashscope_api_key: Optional[SecretStr] = None
+    ollama_api_base: Optional[str] = None
+    ollama_model: Optional[str] = None
     
     # 模型参数
     temperature: float = 0.7
@@ -178,6 +195,12 @@ class LLMSettings(BaseSettings):
     
     # 并发限制
     max_concurrent_requests: int = 10
+    
+    # 缓存配置
+    cache_enabled: bool = True
+    cache_use_redis: bool = False
+    cache_chat_ttl: int = 3600       # Chat 缓存 TTL (秒)
+    cache_embedding_ttl: int = 86400  # Embedding 缓存 TTL (秒)
     
     @property
     def is_configured(self) -> bool:
@@ -271,13 +294,15 @@ class DataSyncSettings(BaseSettings):
     """数据同步配置
     
     环境变量: SYNC_STOCK_BASIC_SCHEDULE, SYNC_STOCK_DAILY_SCHEDULE, 
-             SYNC_INDEX_BASIC_SCHEDULE, SYNC_INDEX_DAILY_SCHEDULE, SYNC_NEWS_SCHEDULE
+             SYNC_INDEX_BASIC_SCHEDULE, SYNC_INDEX_DAILY_SCHEDULE, 
+             SYNC_NEWS_SCHEDULE, SYNC_MULTI_SOURCE_NEWS_SCHEDULE
     
     使用 cron 表达式格式: 分 时 日 月 周
     示例:
       - "0 9 * * 1-5"   每个工作日 9:00
       - "30 15 * * 1-5" 每个工作日 15:30
       - "0 */2 * * *"   每 2 小时
+      - "*/10 * * * *"  每 10 分钟
     """
     model_config = SettingsConfigDict(
         env_prefix="SYNC_",
@@ -312,6 +337,15 @@ class DataSyncSettings(BaseSettings):
     
     # 新闻采集时间 (默认: 每 2 小时)
     news_schedule: Optional[str] = None
+    
+    # 多源新闻采集检查时间 (默认: 每分钟检查，内部按分组差异化调度)
+    multi_source_news_schedule: Optional[str] = None
+    
+    # 事件聚类时间 (默认: 每 30 分钟，LLM 深度去重)
+    event_clustering_schedule: Optional[str] = None
+    
+    # 数据生命周期管理时间 (默认: 每天凌晨 3:00)
+    news_lifecycle_schedule: Optional[str] = None
 
 
 class WebSettings(BaseSettings):
