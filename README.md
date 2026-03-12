@@ -47,8 +47,8 @@
 ### 量化回测
 ![Backtest](docs/images/backtest.png)
 
-### 因子选股
-![Factor Selection](docs/images/factor-selection.png)
+### 行情分析
+![Factor Selection](docs/images/analyzer.png)
 
 ### 热点追踪
 ![Hot News](docs/images/hot-news.png)
